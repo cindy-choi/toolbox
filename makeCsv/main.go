@@ -5,7 +5,30 @@ import (
     "os"
     "flag"
     "fmt"
+    "github.com/goombaio/namegenerator"
+    "math/rand"
+    "strings"
+    "time"
+    "strconv"
 )
+
+func randomString() (result string) {
+  rand.Seed(time.Now().Unix())
+
+  charSet := "abcdedfghijklmnopqrstQWERTYUIOPASDFGHJKLZXCVBNM"
+  var output strings.Builder
+  length := rand.Intn(200 - 50) + 50 // 최소 50, 최대 200 문자
+
+  for i := 0; i < length; i++ {
+    random := rand.Intn(len(charSet))
+    randomChar := charSet[random]
+    output.WriteString(string(randomChar))
+  }
+  result = output.String()
+  output.Reset()
+
+  return result
+}
 
 func main() {
     // 라인 수 입력받기
@@ -32,10 +55,18 @@ func main() {
     // csv writer 생성
     wr := csv.NewWriter(bufio.NewWriter(file))
 
+    // header
+    wr.Write([]string{"name", "age", "sub"})
+
+    seed := time.Now().UTC().UnixNano()
+    nameGenerator := namegenerator.NewNameGenerator(seed)
+
     for i := 0; i < *line; i++ {
-      // csv 내용 쓰기
-      wr.Write([]string{"A", "0.25"})
-      wr.Write([]string{"B", "55.70"})
+      name := nameGenerator.Generate()
+      age := rand.Intn(100)
+      sub := randomString()
+      
+      wr.Write([]string{name, strconv.Itoa(age), sub})
     }
     wr.Flush()
 }
